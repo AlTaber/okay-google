@@ -15,6 +15,7 @@ class Searcher(QMainWindow, Ui_MainWindow):
         self.coords = [19.9026511, 54.6432638]
         self.spn = 0.1
         self.map_format = "sat"
+        self.spn = 0.1
         self.reloadMap()
 
         self.radioButton.toggled.connect(self.change_map_format)
@@ -74,7 +75,6 @@ class Searcher(QMainWindow, Ui_MainWindow):
             self.move()
         elif event.key() == Qt.Key_Right:
             self.move(1)
-
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
