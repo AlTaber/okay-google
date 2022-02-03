@@ -13,7 +13,6 @@ class Searcher(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.image = QLabel(self)
         self.coords = [19.9026511, 54.6432638]
-        self.spn = 0.1
         self.map_format = "sat"
         self.spn = 0.1
         self.reloadMap()
