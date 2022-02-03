@@ -12,8 +12,12 @@ class Searcher(QMainWindow, Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
         self.image = QLabel(self)
+        self.pixmap = QPixmap()
+        self.image.move(5, 100)
+        self.image.resize(500, 350)
+
         self.obj = ''
-        self.coords = [19.9026511, 54.6432638]
+        self.coords = [19.9026, 54.6432]
         self.map_format = "sat"
         self.spn = 0.1
         self.reloadMap()
@@ -24,28 +28,16 @@ class Searcher(QMainWindow, Ui_MainWindow):
         self.pushButton.clicked.connect(self.search)
 
     def reloadMap(self):  # 19.9026511,54.6432638
-        self.image.clear()
-        data = requests.get(
-            f'https://static-maps.yandex.ru/1.x/?ll={self.coords}&spn=0.1,0.1&l={self.map_format}').content
-
-    def reloadMap(self):  # 19.9026511,54.6432638
-        self.image.clear()
         self.lineEdit.setText(f'{self.coords[0]}, {self.coords[1]}')
-        data = requests.get(f'https://static-maps.yandex.ru/1.x/?ll={self.coords[0]},{self.coords[1]}&spn={self.spn},{self.spn}&l={self.map_format}').content
-        self.pixmap = QPixmap()
+        data = requests.get(f'https://static-maps.yandex.ru/1.x/?ll={self.coords[0]},{self.coords[1]}'
+                            f'&spn={self.spn},{self.spn}&l={self.map_format}').content
         self.pixmap.loadFromData(data)
-        self.image.move(5, 100)
-        self.image.resize(500, 350)
         self.image.setPixmap(self.pixmap)
-#<<<<<<< AndrDD
-#=======
-        self.pushButton.clicked.connect(self.set_img)
 
     def set_img(self):
         print(self.lineEdit.text())
         self.coords = [float(el) for el in self.lineEdit.text().split(', ')]
         self.reloadMap()
-#>>>>>>> saks
 
     def change_map_format(self):
         if self.sender().text() == "Спутник":
@@ -70,9 +62,8 @@ class Searcher(QMainWindow, Ui_MainWindow):
         toponym = json_response["response"]["GeoObjectCollection"][
             "featureMember"][0]["GeoObject"]
         toponym_coodrinates = toponym["Point"]["pos"]
-        toponym_a, toponym_b = toponym_coodrinates.split(" ")
-        self.coords = f'{toponym_a},{toponym_b}'
-        print(toponym_coodrinates)
+        toponym_a, toponym_b = toponym_coodrinates.split()
+        self.coords = [float(toponym_a), float(toponym_b)]
         try:
             self.reloadMap()
         except:
@@ -105,6 +96,7 @@ class Searcher(QMainWindow, Ui_MainWindow):
             self.move()
         elif event.key() == Qt.Key_Right:
             self.move(1)
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
