@@ -12,8 +12,12 @@ class Searcher(QMainWindow, Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
         self.image = QLabel(self)
-        self.coords = [19.9026511, 54.6432638]
-        self.spn = 0.1
+        self.pixmap = QPixmap()
+        self.image.move(5, 100)
+        self.image.resize(500, 350)
+
+        self.obj = ''
+        self.coords = [19.9026, 54.6432]
         self.map_format = "sat"
         self.spn = 0.1
         self.reloadMap()
@@ -21,18 +25,14 @@ class Searcher(QMainWindow, Ui_MainWindow):
         self.radioButton.toggled.connect(self.change_map_format)
         self.radioButton_2.toggled.connect(self.change_map_format)
         self.radioButton_3.toggled.connect(self.change_map_format)
-        self.pushButton_2.clicked.connect(self.move)
+        self.pushButton.clicked.connect(self.search)
 
     def reloadMap(self):  # 19.9026511,54.6432638
-        self.image.clear()
         self.lineEdit.setText(f'{self.coords[0]}, {self.coords[1]}')
-        data = requests.get(f'https://static-maps.yandex.ru/1.x/?ll={self.coords[0]},{self.coords[1]}&spn={self.spn},{self.spn}&l={self.map_format}').content
-        self.pixmap = QPixmap()
+        data = requests.get(f'https://static-maps.yandex.ru/1.x/?ll={self.coords[0]},{self.coords[1]}'
+                            f'&spn={self.spn},{self.spn}&l={self.map_format}').content
         self.pixmap.loadFromData(data)
-        self.image.move(5, 100)
-        self.image.resize(500, 350)
         self.image.setPixmap(self.pixmap)
-        self.pushButton.clicked.connect(self.set_img)
 
     def set_img(self):
         print(self.lineEdit.text())
@@ -47,6 +47,27 @@ class Searcher(QMainWindow, Ui_MainWindow):
         elif self.sender().text() == "Гибрид":
             self.map_format = "sat,skl"
         self.reloadMap()
+
+    def search(self):
+        self.obj = self.lineEdit.text()
+        toponym_to_find = self.obj
+        geocoder_api_server = "http://geocode-maps.yandex.ru/1.x/"
+
+        geocoder_params = {
+            "apikey": "40d1649f-0493-4b70-98ba-98533de7710b",
+            "geocode": toponym_to_find,
+            "format": "json"}
+        response = requests.get(geocoder_api_server, params=geocoder_params)
+        json_response = response.json()
+        toponym = json_response["response"]["GeoObjectCollection"][
+            "featureMember"][0]["GeoObject"]
+        toponym_coodrinates = toponym["Point"]["pos"]
+        toponym_a, toponym_b = toponym_coodrinates.split()
+        self.coords = [float(toponym_a), float(toponym_b)]
+        try:
+            self.reloadMap()
+        except:
+            print('error')
 
     def move(self, direction=0):
         if not direction:
@@ -75,6 +96,7 @@ class Searcher(QMainWindow, Ui_MainWindow):
             self.move()
         elif event.key() == Qt.Key_Right:
             self.move(1)
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
