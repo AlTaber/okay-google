@@ -14,6 +14,7 @@ class Searcher(QMainWindow, Ui_MainWindow):
         self.coords = '19.9026511,54.6432638'
         self.map_format = "sat"
         self.reloadMap()
+        self.lineEdit.setText(self.coords)
 
         self.radioButton.toggled.connect(self.change_map_format)
         self.radioButton_2.toggled.connect(self.change_map_format)
