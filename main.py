@@ -2,6 +2,7 @@ from debil import Ui_MainWindow
 from PyQt5.QtWidgets import *
 from PyQt5 import *
 from PyQt5.QtGui import *
+from PyQt5.QtCore import Qt
 import sys
 import requests
 
@@ -13,6 +14,7 @@ class Searcher(QMainWindow, Ui_MainWindow):
         self.image = QLabel(self)
         self.coords = '19.9026511,54.6432638'
         self.map_format = "sat"
+        self.spn = 0.1
         self.reloadMap()
 
         self.radioButton.toggled.connect(self.change_map_format)
@@ -21,7 +23,8 @@ class Searcher(QMainWindow, Ui_MainWindow):
 
     def reloadMap(self):  # 19.9026511,54.6432638
         self.image.clear()
-        data = requests.get(f'https://static-maps.yandex.ru/1.x/?ll={self.coords}&spn=0.1,0.1&l={self.map_format}').content
+        data = requests.get(f'https://static-maps.yandex.'
+                            f'ru/1.x/?ll={self.coords}&spn={self.spn},{self.spn}&l={self.map_format}').content
         self.pixmap = QPixmap()
         self.pixmap.loadFromData(data)
         self.image.move(5, 100)
@@ -42,6 +45,14 @@ class Searcher(QMainWindow, Ui_MainWindow):
         elif self.sender().text() == "Гибрид":
             self.map_format = "sat,skl"
         self.reloadMap()
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Up:
+            self.spn += 0.05
+            self.reloadMap()
+        elif event.key() == Qt.Key_Down:
+            self.spn = 0.1 if self.spn - 0.05 <= 0.1 else self.spn - 0.05
+            self.reloadMap()
 
 
 if __name__ == '__main__':
