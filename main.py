@@ -21,10 +21,13 @@ class Searcher(QMainWindow, Ui_MainWindow):
         self.map_format = "sat"
         self.spn = 0.1
         self.reloadMap()
+        self.ind = 'yes'
 
         self.radioButton.toggled.connect(self.change_map_format)
         self.radioButton_2.toggled.connect(self.change_map_format)
         self.radioButton_3.toggled.connect(self.change_map_format)
+        self.radioButton_5.toggled.connect(self.change_map_format)
+        self.radioButton_4.toggled.connect(self.change_map_format)
         self.pushButton.clicked.connect(self.search)
 
     def reloadMap(self):  # 19.9026511,54.6432638
@@ -46,6 +49,10 @@ class Searcher(QMainWindow, Ui_MainWindow):
             self.map_format = "map"
         elif self.sender().text() == "Гибрид":
             self.map_format = "sat,skl"
+        elif self.sender().text() == "Да":
+            self.ind = 'yes'
+        elif self.sender().text() == "Нет":
+            self.ind = 'no'
         self.reloadMap()
 
     def search(self):
@@ -63,13 +70,17 @@ class Searcher(QMainWindow, Ui_MainWindow):
             "featureMember"][0]["GeoObject"]
         toponym_coodrinates = toponym["Point"]["pos"]
         toponym_name = toponym["metaDataProperty"]["GeocoderMetaData"]["text"]
+        if self.ind == 'yes':
+            toponym_index = toponym["metaDataProperty"]["GeocoderMetaData"]["Address"]['postal_code']
+        else:
+            toponym_index = ''
         toponym_a, toponym_b = toponym_coodrinates.split()
         self.coords = [float(toponym_a), float(toponym_b)]
-        self.textEdit.setText(toponym_name)
+        self.textEdit.setText(f"{toponym_name}, индекс: {toponym_index}")
         try:
             self.reloadMap()
-        except:
-            print('error')
+        except Exception as e:
+            print(e)
 
     def move(self, direction=0):
         if not direction:
