@@ -62,8 +62,10 @@ class Searcher(QMainWindow, Ui_MainWindow):
         toponym = json_response["response"]["GeoObjectCollection"][
             "featureMember"][0]["GeoObject"]
         toponym_coodrinates = toponym["Point"]["pos"]
+        toponym_name = toponym["metaDataProperty"]["GeocoderMetaData"]["text"]
         toponym_a, toponym_b = toponym_coodrinates.split()
         self.coords = [float(toponym_a), float(toponym_b)]
+        self.textEdit.setText(toponym_name)
         try:
             self.reloadMap()
         except:
